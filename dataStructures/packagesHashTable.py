@@ -28,9 +28,23 @@ class HashTable:
         hash_key = self._hashKey_(key);
         #add to table
         self.table[hash_key].append(packageData);
+    
 
+    # Searching for data
+    def search(self, key):
 
-    #print data (TEST)
+        #get hash version of a key        
+        hash_key = self._hashKey_(key);
+        #get value that is assign to this hashkey
+        values = self.table[hash_key];
+        #Make sure that if package Id doesnt exist null will be returned
+        for value in values:
+            if(value.packageId == key):
+                return value;
+            else:
+                return None;
+
+    #print data
     def printTable(self):
         for tableBucket in self.table:
             for item in tableBucket:
