@@ -9,10 +9,11 @@ class Package:
     state = "";  
     zipCode = "";
     weight = -1; 
-    status = "";
+    notes = "";
+    status = "not Delivered"
 
     #Constructor
-    def __init__(self, id, address, deadline, city, state, zipCode,weight,status):
+    def __init__(self, id, address, city, state, zipCode, deadline, weight, notes, status):
 
         self.packageId = id;
         self.address = address;
@@ -21,5 +22,6 @@ class Package:
         self.state = state;
         self.zipCode = zipCode;
         self.weight = weight;
-        self.status = status;
+        self.notes = notes;
+        self.status = status
 

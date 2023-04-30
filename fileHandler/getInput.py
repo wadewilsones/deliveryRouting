@@ -21,8 +21,7 @@ def insertData(newTable, type):
                     columns = row[:8] 
 
                     #Create a new package with unpacking values
-                    package = dataStructures.Package.Package(*columns)
-
+                    package = dataStructures.Package.Package(*columns, "in Dispatch")
                     #Add package to HashTable
                     newTable.insert(package)
 

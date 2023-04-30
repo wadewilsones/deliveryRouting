@@ -18,3 +18,7 @@ class Truck:
         trackData = [capacity, speed, packages, address, milage, timeLeavingtHub];
         return trackData;
 
+    def deliverTime(currentTime, distance):
+      newTime = distance / self.speed
+      self.timeLeavingtHub = currentTime + newTime
+
