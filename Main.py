@@ -14,7 +14,7 @@ def main():
     newTable = dataStructures.packagesHashTable.HashTable(40)
 
     #Define a graph
-    newGraph = dataStructures.distanceGraph.distanceGraph(40)
+    newGraph = dataStructures.distanceGraph.distanceGraph(27)
 
     #Add data from Excel to the package and to created Table
     fileHandler.getInput.insertData(newTable, "package")
@@ -23,7 +23,7 @@ def main():
     #Create a new graph
     newGraph = dataStructures.distanceGraph.distanceGraph(40)
     fileHandler.getInput.insertData(newGraph, "addresses")
-    #fileHandler.getInput.insertData(newGraph, "distance")
+    fileHandler.getInput.insertData(newGraph, "distance")
     #Add GUI
 
 

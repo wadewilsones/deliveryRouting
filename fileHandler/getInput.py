@@ -32,14 +32,35 @@ def insertData(newTable, type):
                 index = 0
                 for row in excelSheet.iter_rows(values_only=True):
                     column = row[:1]
+                    if None in column:
+                        continue  # skip row with None values
+                    print(column)
                     newTable.updateVertex(index, column)
-                    index = index+1
-                newTable.printVertex()
-
+                    index += 1
+                    
+                
 
             #Add data to graph edge
             elif(type == "distance"):
-               print("Add distance to edge")        
+                index = 27
+
+                for row in  excelSheet.iter_rows(values_only=True):
+                 column = row[:index]
+
+                 for cell in row:
+                    #Add cell into vertex if the distance not null
+                    if cell is not None:
+                        vertexIn = 0
+                        for vertex in newTable.vertices:
+                            vertexInsecond = 1
+                            for vertexSecond in newTable.vertices:
+                                newTable.updateEdge(newTable.vertices[vertexIn],newTable.vertices[vertexInsecond], int(cell)) #add edge
+                                vertexInsecond += 1
+                            vertexIn += 1
+                print(newTable.get_distanceOfVertexes(0,1))       
+                    
+                index = index-1
+
   
 
 

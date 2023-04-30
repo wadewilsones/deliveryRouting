@@ -24,7 +24,8 @@ class distanceGraph:
     def get_distanceOfVertexes(self, vertixIndex1, vertixIndex2):
         return self.edges[vertixIndex1][vertixIndex2]
     
-
+    #print
     def printVertex(self):
-        for value in self.edges:
+        for value in self.vertices:
             print (value)
+
