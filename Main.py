@@ -27,7 +27,7 @@ def main():
 
 
     # Start loading track and add time
-    time = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=8));
+    time = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=8, minute = 0));
     delayedTime = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=9, minute=5))
 
     hub = str(newGraph.vertices[0]);
@@ -65,34 +65,59 @@ def main():
     firstTruck = dataStructures.Truck.Truck(16, 18, firstTruckLoad, hub, 0, time)
     secondTruck = dataStructures.Truck.Truck(16, 18, secondTruckLoad, hub, 0, time)
 
+    def deliver(package, distance, startTime, speed):
+
+        #Set new time when truck will be at the address
+        timeToGetToDestination = distance / speed
+        deliveredTime = startTime + datetime.timedelta(hours=timeToGetToDestination)
+
+        package.status = f'Delivered at {deliveredTime}'
+        print(f'{package.packageId} and {package.status} to address {package.address}')
+
     #Start route (nearest neighbor)
-    def createRoute(truck):
+    def createRoute(truck, startTime):
 
         #Start route
         startPoint = "4001 South 700 East"
         destination = ""
         minimalDistance = 140
+        timeInFirstPoint = startTime
 
         listOfVertexes = newGraph.convertToString()
         indexOfStartPoint = newGraph.getIndexOfVertex(startPoint)
 
-        #Get all addresses from packages
-        for packages in firstTruck.packages:
-            for vertics in listOfVertexes:
-                # get distance from all of them compared with first distination
-                if(packages.address == vertics):
-                    secondIndex = newGraph.getIndexOfVertex(packages.address)
-                    distance = newGraph.get_distanceOfVertexes(indexOfStartPoint, secondIndex)
-                    #print(f"The distance between {startPoint} and {packages.address} is {distance}")
-                    if(distance < minimalDistance):
-                        minimalDistance = distance
-                        destination = packages.address
-                        #print(f" Current point {startPoint} -  Destination: {packages.address} that is {distance} miles away")
-                        #Deliver a package
+        currentPackage = None
 
-        print(f"From {startPoint} to {destination} in {minimalDistance} miles")
+        #Get all addresses from packages
+        for packages in truck.packages:
+
+            if(packages.status != "Delivered"):
+                #Update packages status
+                packages.status = 'en route'
+                for vertics in listOfVertexes:
+
+                    # get distance from all of them compared with first distination
+                    if(packages.address == vertics):
+
+                        secondIndex = newGraph.getIndexOfVertex(packages.address)
+                        distance = newGraph.get_distanceOfVertexes(indexOfStartPoint, secondIndex)
+
+                        if(distance < minimalDistance):
+
+                            minimalDistance = distance
+                            #destination = packages.address
+                            currentPackage = packages
+
+                #Deliver a package
+        deliver(currentPackage, minimalDistance, timeInFirstPoint, truck.speed)
+            
         
-    createRoute(firstTruck)
+                #print(f"From {startPoint} to {destination} in {minimalDistance} miles")
+
+    createRoute(firstTruck, time)
+
+
+
 
 #launch App
 main();

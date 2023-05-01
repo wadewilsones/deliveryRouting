@@ -10,7 +10,7 @@ class Package:
     zipCode = "";
     weight = -1; 
     notes = "";
-    status = "not Delivered"
+    status = "at the hub"
 
     #Constructor
     def __init__(self, id, address, city, state, zipCode, deadline, weight, notes, status):
