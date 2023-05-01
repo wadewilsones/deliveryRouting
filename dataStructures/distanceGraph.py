@@ -28,7 +28,7 @@ class distanceGraph:
 
     #get distance between 2 vertices
     def get_distanceOfVertexes(self, vertixIndex1, vertixIndex2):
-        print(self.edges[vertixIndex1][vertixIndex2])
+
         return self.edges[vertixIndex1][vertixIndex2]
     
     #print

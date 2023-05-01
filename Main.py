@@ -66,9 +66,13 @@ def main():
     secondTruck = dataStructures.Truck.Truck(16, 18, secondTruckLoad, hub, 0, time)
 
     #Start route (nearest neighbor)
-    def createRoute(truck, startPoint):
+    def createRoute(truck):
 
+        #Start route
+        startPoint = "4001 South 700 East"
+        destination = ""
         minimalDistance = 140
+
         listOfVertexes = newGraph.convertToString()
         indexOfStartPoint = newGraph.getIndexOfVertex(startPoint)
 
@@ -79,10 +83,16 @@ def main():
                 if(packages.address == vertics):
                     secondIndex = newGraph.getIndexOfVertex(packages.address)
                     distance = newGraph.get_distanceOfVertexes(indexOfStartPoint, secondIndex)
-                    print(f"The distance between {startPoint} and {packages.address} is {distance}")
+                    #print(f"The distance between {startPoint} and {packages.address} is {distance}")
+                    if(distance < minimalDistance):
+                        minimalDistance = distance
+                        destination = packages.address
+                        #print(f" Current point {startPoint} -  Destination: {packages.address} that is {distance} miles away")
+                        #Deliver a package
+
+        print(f"From {startPoint} to {destination} in {minimalDistance} miles")
         
-        
-    createRoute(firstTruck, "4001 South 700 East")
+    createRoute(firstTruck)
 
 #launch App
 main();
