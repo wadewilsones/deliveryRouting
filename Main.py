@@ -27,8 +27,10 @@ def main():
 
 
     # Start loading track and add time
-    globalTime = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=8));
+    time = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=8));
     delayedTime = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=9, minute=5))
+
+    hub = str(newGraph.vertices[0]);
 
     #Lists for first load
     firstTruckLoad = []
@@ -36,42 +38,51 @@ def main():
 
     #Determine what packages should be delivered first
     priorityPackages = [pack for bucket in newTable.table for pack in bucket if pack.deadline !="EOD" or pack.packageId == 19]
-    eodPackages = [pack for bucket in newTable.table for pack in bucket if pack.deadline == "EOD" and pack not in firstTruckLoad]
+    eodPackages = [pack for bucket in newTable.table for pack in bucket if pack.deadline == "EOD" and pack not in firstTruckLoad and pack.packageId != 19]
 
-    
-    def loadToTruck():
+    #Determine which packages will go to truck
+    def initialLoad():
 
-        #Get time first
-        if(globalTime < delayedTime):
-            #Upload only packages that have not been delayed
+        #Upload only packages that have not been delayed
+        for package in priorityPackages:
+            if(len(firstTruckLoad) < 16):
+                if not re.search(r"delayed", str(package.notes), re.IGNORECASE):
+                    firstTruckLoad.append(package)
 
-             #truck is first
-                        for package in priorityPackages:
-                            if(len(firstTruckLoad) < 16):
-                                if not re.search(r"delayed", str(package.notes), re.IGNORECASE) or package.packageId == 19:
-                                    firstTruckLoad.append(package)
-                        for package in eodPackages:
-                            if(len(firstTruckLoad) < 16):
-                                if not re.search(r"delayed", str(package.notes), re.IGNORECASE) and not re.search(r"2", str(package.notes), re.IGNORECASE):
-                                    firstTruckLoad.append(package)        
-                        
-                
-    loadToTruck();
-  
-    #TEST
-    for package in firstTruckLoad:
-        print(f"Packages in first truck {package.packageId}")
+        for package in eodPackages:
+                          
+            if(len(firstTruckLoad) < 16):
+                if not re.search(r"delayed", str(package.notes), re.IGNORECASE) and not re.search(r"2", str(package.notes), re.IGNORECASE):
+                    firstTruckLoad.append(package)
+                          
+            elif(len(secondTruckLoad) < 16):
+                if not re.search(r"delayed", str(package.notes), re.IGNORECASE) and package.packageId != 9:
+                    secondTruckLoad.append(package)
 
-            #TEST
-    for package in secondTruckLoad:
-        print(f"Packages in second truck {package.packageId}")
+    initialLoad()
 
-   # newTable.printTable()
+    #  Load trucks with selected packages
+    firstTruck = dataStructures.Truck.Truck(16, 18, firstTruckLoad, hub, 0, time)
+    secondTruck = dataStructures.Truck.Truck(16, 18, secondTruckLoad, hub, 0, time)
 
-    # Send first truch to first point
-    #firstTruck = dataStructures.Truck(16, 18, 16, address, 0, shiftStart)
+    #Start route (nearest neighbor)
+    def createRoute(truck, startPoint):
 
+        minimalDistance = 140
+        listOfVertexes = newGraph.convertToString()
+        indexOfStartPoint = newGraph.getIndexOfVertex(startPoint)
 
+        #Get all addresses from packages
+        for packages in firstTruck.packages:
+            for vertics in listOfVertexes:
+                # get distance from all of them compared with first distination
+                if(packages.address == vertics):
+                    secondIndex = newGraph.getIndexOfVertex(packages.address)
+                    distance = newGraph.get_distanceOfVertexes(indexOfStartPoint, secondIndex)
+                    print(f"The distance between {startPoint} and {packages.address} is {distance}")
+        
+        
+    createRoute(firstTruck, "4001 South 700 East")
 
 #launch App
 main();

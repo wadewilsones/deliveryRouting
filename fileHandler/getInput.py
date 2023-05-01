@@ -35,7 +35,6 @@ def insertData(newTable, type):
                         continue  # skip row with None values
                     newTable.updateVertex(index, column)
                     index += 1
-               
                         
             
             #Add data to graph edge

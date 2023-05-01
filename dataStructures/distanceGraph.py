@@ -14,6 +14,12 @@ class distanceGraph:
     def updateVertex(self, index, address):
         self.vertices[index] = address
 
+
+    def getIndexOfVertex(self, vericeAddress):
+        for index, vertice in  enumerate(self.vertices):
+            if(''.join(vertice) == vericeAddress):
+                return(index)
+
     #update edge
     def updateEdge(self, vertixIndex1, vertixIndex2, distance):
         self.edges[vertixIndex1][vertixIndex2] = distance
@@ -36,3 +42,14 @@ class distanceGraph:
             print (value)
 
 
+    # convert vertice to String
+
+    def convertToString(self):
+        listofVertices = []
+        for vertice in self.vertices:
+            verticeStr = ""
+            verticeStr = verticeStr.join(vertice)
+            verticeStr.replace('(','').replace(')','')
+            listofVertices.append(verticeStr)
+            
+        return listofVertices
