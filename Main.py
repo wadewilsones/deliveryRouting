@@ -30,7 +30,9 @@ def main():
     time = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=8, minute = 0));
     delayedTime = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=9, minute=5))
 
-    hub = str(newGraph.vertices[0]);
+    #Total miles
+
+    milesTotal = 0
 
     #Lists for first load
     firstTruckLoad = []
@@ -48,22 +50,24 @@ def main():
             if(len(firstTruckLoad) < 16):
                 if not re.search(r"delayed", str(package.notes), re.IGNORECASE):
                     firstTruckLoad.append(package)
-
+                   
         for package in eodPackages:
                           
             if(len(firstTruckLoad) < 16):
                 if not re.search(r"delayed", str(package.notes), re.IGNORECASE) and not re.search(r"2", str(package.notes), re.IGNORECASE):
                     firstTruckLoad.append(package)
+                 
                           
-            elif(len(secondTruckLoad) < 16):
+            elif(len(secondTruckLoad) < 16 and (package not in firstTruckLoad)):
                 if not re.search(r"delayed", str(package.notes), re.IGNORECASE) and package.packageId != 9:
                     secondTruckLoad.append(package)
 
     initialLoad()
 
+
     #  Load trucks with selected packages
-    firstTruck = dataStructures.Truck.Truck(16, 18, firstTruckLoad, hub, 0, time)
-    secondTruck = dataStructures.Truck.Truck(16, 18, secondTruckLoad, hub, 0, time)
+    firstTruck = dataStructures.Truck.Truck(16, 18, firstTruckLoad, 0, time)
+    secondTruck = dataStructures.Truck.Truck(16, 18, secondTruckLoad, 0, time)
 
     def deliver(package, distance, startTime, speed, truck):
 
@@ -101,15 +105,12 @@ def main():
          
             #For each package determine the best address and deliver it
             for package in truck.packages:
-              
                 if package.status != "Delivered":
                     #Update packages status
                     package.status = f'en route at {timeInFirstPoint}'
-
                     #Get indices of start and end points
                     startPointIndex = newGraph.getIndexOfVertex(startPoint)
                     possibleDestinationIndex = newGraph.getIndexOfVertex(package.address)
-                
                     #Get distance between current point and possible one
                     distance = newGraph.get_distanceOfVertexes(startPointIndex, possibleDestinationIndex)
 
@@ -118,7 +119,7 @@ def main():
 
                         minimalDistance = distance
                         currentPackageinDelivery = package
-            print(f"Package will be delivered to {currentPackageinDelivery.address} from {startPoint} with distance {minimalDistance}, current time {timeInFirstPoint}")
+            #print(f"Package will be delivered to {currentPackageinDelivery.address} from {startPoint} with distance {minimalDistance}, current time {timeInFirstPoint}")
             timeInFirstPoint = deliver(currentPackageinDelivery, minimalDistance, timeInFirstPoint, truck.speed, truck)
             startPoint = currentPackageinDelivery.address
             
@@ -134,13 +135,18 @@ def main():
         timeAtHub = timeInFirstPoint + datetime.timedelta(hours=timeToGetToDestination)
         #Increase milage
         truck.milage = truck.milage + distanceToHub
-        print(timeAtHub)
+        milesTotal = milesTotal +  truck.milage
+        #Add to miles
+
         return timeAtHub 
                         
 
-
-
     createRoute(firstTruck, time)
+    createRoute(secondTruck, time)
+
+    if(createRoute(firstTruck, time) >  createRoute(secondTruck, time)):
+        #Load first truck
+        #secondLoad()
 
 
 #launch App

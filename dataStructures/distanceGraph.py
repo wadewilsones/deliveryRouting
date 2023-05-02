@@ -1,6 +1,8 @@
 
 #This file define graph where edges represent distance and vertices represent addresses
 
+import re
+
 class distanceGraph:
 
     #constructor
