@@ -65,58 +65,74 @@ def main():
     firstTruck = dataStructures.Truck.Truck(16, 18, firstTruckLoad, hub, 0, time)
     secondTruck = dataStructures.Truck.Truck(16, 18, secondTruckLoad, hub, 0, time)
 
-    def deliver(package, distance, startTime, speed):
+    def deliver(package, distance, startTime, speed, truck):
+
+        additionalPackages = []
 
         #Set new time when truck will be at the address
         timeToGetToDestination = distance / speed
         deliveredTime = startTime + datetime.timedelta(hours=timeToGetToDestination)
+        #Increase milage
+        truck.milage = truck.milage + distance
 
+        #Test is there any other package at the same address
+        for pack in truck.packages:
+            if(package.address == pack.address and package.packageId != pack.packageId):
+                print(f"Matching {package.packageId} and {pack.packageId}")
+                truck.packages.remove(pack)
+
+        #Change package status
         package.status = f'Delivered at {deliveredTime}'
-        print(f'{package.packageId} and {package.status} to address {package.address}')
+        #Remove package from truck
+        truck.packages.remove(package)
+        return deliveredTime
+      
 
     #Start route (nearest neighbor)
     def createRoute(truck, startTime):
 
         #Start route
         startPoint = "4001 South 700 East"
-        destination = ""
-        minimalDistance = 140
+        listOfVertexes = newGraph.convertToString()
         timeInFirstPoint = startTime
 
-        listOfVertexes = newGraph.convertToString()
-        indexOfStartPoint = newGraph.getIndexOfVertex(startPoint)
+        #While we still have packages
+        while len(truck.packages) > 0:
 
-        currentPackage = None
+            currentPackageinDelivery = None
+            minimalDistance = 140
+         
+            print(len(truck.packages))
+            #For each package determine the best address and deliver it
+            for package in truck.packages:
+              
+                if package.status != "Delivered":
+                    #Update packages status
+                    package.status = 'en route'
 
-        #Get all addresses from packages
-        for packages in truck.packages:
+                    #Get indices of start and end points
+                    startPointIndex = newGraph.getIndexOfVertex(startPoint)
+                    possibleDestinationIndex = newGraph.getIndexOfVertex(package.address)
+                
+                    #Get distance between current point and possible one
+                    distance = newGraph.get_distanceOfVertexes(startPointIndex, possibleDestinationIndex)
 
-            if(packages.status != "Delivered"):
-                #Update packages status
-                packages.status = 'en route'
-                for vertics in listOfVertexes:
+                    #Find the shortest distance
+                    if distance < minimalDistance:
 
-                    # get distance from all of them compared with first distination
-                    if(packages.address == vertics):
-
-                        secondIndex = newGraph.getIndexOfVertex(packages.address)
-                        distance = newGraph.get_distanceOfVertexes(indexOfStartPoint, secondIndex)
-
-                        if(distance < minimalDistance):
-
-                            minimalDistance = distance
-                            #destination = packages.address
-                            currentPackage = packages
-
-                #Deliver a package
-        deliver(currentPackage, minimalDistance, timeInFirstPoint, truck.speed)
+                        minimalDistance = distance
+                        currentPackageinDelivery = package
+            print(f"Package will be delivered to {currentPackageinDelivery.address} from {startPoint} with distance {minimalDistance}")
+            timeInFirstPoint = deliver(currentPackageinDelivery, minimalDistance, timeInFirstPoint, truck.speed, truck)
+            startPoint = currentPackageinDelivery.address
             
-        
-                #print(f"From {startPoint} to {destination} in {minimalDistance} miles")
+          
+     
+                        
+
+
 
     createRoute(firstTruck, time)
-
-
 
 
 #launch App
