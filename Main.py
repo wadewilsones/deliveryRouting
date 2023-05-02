@@ -67,8 +67,6 @@ def main():
 
     def deliver(package, distance, startTime, speed, truck):
 
-        additionalPackages = []
-
         #Set new time when truck will be at the address
         timeToGetToDestination = distance / speed
         deliveredTime = startTime + datetime.timedelta(hours=timeToGetToDestination)
@@ -78,7 +76,6 @@ def main():
         #Test is there any other package at the same address
         for pack in truck.packages:
             if(package.address == pack.address and package.packageId != pack.packageId):
-                print(f"Matching {package.packageId} and {pack.packageId}")
                 truck.packages.remove(pack)
 
         #Change package status
@@ -102,13 +99,12 @@ def main():
             currentPackageinDelivery = None
             minimalDistance = 140
          
-            print(len(truck.packages))
             #For each package determine the best address and deliver it
             for package in truck.packages:
               
                 if package.status != "Delivered":
                     #Update packages status
-                    package.status = 'en route'
+                    package.status = f'en route at {timeInFirstPoint}'
 
                     #Get indices of start and end points
                     startPointIndex = newGraph.getIndexOfVertex(startPoint)
@@ -122,12 +118,24 @@ def main():
 
                         minimalDistance = distance
                         currentPackageinDelivery = package
-            print(f"Package will be delivered to {currentPackageinDelivery.address} from {startPoint} with distance {minimalDistance}")
+            print(f"Package will be delivered to {currentPackageinDelivery.address} from {startPoint} with distance {minimalDistance}, current time {timeInFirstPoint}")
             timeInFirstPoint = deliver(currentPackageinDelivery, minimalDistance, timeInFirstPoint, truck.speed, truck)
             startPoint = currentPackageinDelivery.address
             
-          
-     
+        
+
+        #Go back to hub and get time of arival
+        hubIndex = newGraph.getIndexOfVertex("4001 South 700 East")
+        currentAddress = newGraph.getIndexOfVertex(startPoint)
+        distanceToHub = newGraph.get_distanceOfVertexes(currentAddress, hubIndex)
+
+        #Set new time when truck will be at the address
+        timeToGetToDestination = distance / truck.speed
+        timeAtHub = timeInFirstPoint + datetime.timedelta(hours=timeToGetToDestination)
+        #Increase milage
+        truck.milage = truck.milage + distanceToHub
+        print(timeAtHub)
+        return timeAtHub 
                         
 
 
