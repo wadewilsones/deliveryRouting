@@ -28,7 +28,17 @@ class HashTable:
         hash_key = self._hashKey_(key);
         #add to table
         self.table[hash_key].append(packageData);
-    
+
+
+    def remove(self, package):
+
+        #hash key
+        hash_key = self._hashKey_(package.packageId)
+        bucket = self.table[hash_key]
+        for pack in bucket:
+            if(pack.packageId == package.packageId):
+                bucket.remove(pack)
+
 
     # Searching for data
     def search(self, key):
