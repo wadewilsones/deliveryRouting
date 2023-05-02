@@ -30,19 +30,16 @@ class HashTable:
         self.table[hash_key].append(packageData);
 
 
-    def remove(self, package):
+    def printStatus(self):
 
-        #hash key
-        hash_key = self._hashKey_(package.packageId)
-        bucket = self.table[hash_key]
-        for pack in bucket:
-            if(pack.packageId == package.packageId):
-                bucket.remove(pack)
+        for bucket in self.table:
+            for package in bucket:
+                print(f"{package.packageId} status: {package.status}")
+
 
 
     # Searching for data
     def search(self, key):
-
         #get hash version of a key        
         hash_key = self._hashKey_(key);
         #get value that is assign to this hashkey
@@ -50,16 +47,7 @@ class HashTable:
         #Make sure that if package Id doesnt exist null will be returned
         for value in values:
             if(value.packageId == key):
-                return value;
-            else:
-                return None;
+                return value
 
-    #print data
-    def printTable(self):
-        for tableBucket in self.table:
-            for item in tableBucket:
-                print("Key:", item.packageId)
-                print("Value:", item.address)
 
-    
-    
+               
