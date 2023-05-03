@@ -30,10 +30,6 @@ def startDelivery():
         time = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=8, minute = 0));
         delayedTime = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=9, minute=5))
 
-        #Total miles
-
-        milesTotal = 0
-
         #Lists for first load
         firstTruckLoad = []
         secondTruckLoad = []
@@ -43,33 +39,38 @@ def startDelivery():
         eodPackages = [pack for bucket in newTable.table for pack in bucket if pack.deadline == "EOD" and pack not in firstTruckLoad and pack.packageId != 19]
         #Determine which packages will go to truck
         def initialLoad():
-
+            
             #Upload only packages that have not been delayed
+
             for package in priorityPackages:
                 if(len(firstTruckLoad) < 10):
                     if not re.search(r"delayed", str(package.notes), re.IGNORECASE):
                         firstTruckLoad.append(package)
-                        #Assign a new status
-                        package.status = "en route"
-                        newTable.search(package.packageId).status = "en route" # update in hashtable
+
                     
             for package in eodPackages:
                             
                 if(len(firstTruckLoad) < 9):
                     if not re.search(r"delayed", str(package.notes), re.IGNORECASE) and not re.search(r"2", str(package.notes), re.IGNORECASE):
                         firstTruckLoad.append(package)
-                        #Assign a new status
-                        package.status = "en route"
-                        newTable.search(package.packageId).status = "en route" # update in hashtable
                             
                 elif(len(secondTruckLoad) < 16 and (package not in firstTruckLoad)):
+
                     if not re.search(r"delayed", str(package.notes), re.IGNORECASE) and package.packageId != 9:
                         secondTruckLoad.append(package)
-                         #Assign a new status
-                        package.status = "en route"
-                        newTable.search(package.packageId).status = "en route" # update in hashtable
 
+            #Update status to "en route"
+            for pack in firstTruckLoad:
+                newTable.assignStatus(pack, time)
+
+            #Update status to "en route" for second truck
+            for pack in secondTruckLoad:
+                newTable.assignStatus(pack, time)                      
+                
         initialLoad()
+
+
+
 
         #  Load trucks with selected packages
         firstTruck = dataStructures.Truck.Truck(16, 18, firstTruckLoad, 0, time)
@@ -78,29 +79,40 @@ def startDelivery():
         def deliver(package, distance, startTime, speed, truck):
 
             #Set new time when truck will be at the address
-            timeToGetToDestination = distance / speed
-            deliveredTime = startTime + datetime.timedelta(hours=timeToGetToDestination)
+            deliveredTime = truck.estimatedTimeofDelivery(speed, distance, startTime)
             #Increase milage
             truck.milage = truck.milage + distance
 
             #Test is there any other package at the same address
             for pack in truck.packages:
                 if(package.address == pack.address and package.packageId != pack.packageId):
-                    package.status = f'Delivered at {deliveredTime}'
+                    package.status = 'Delivered'
                     truck.packages.remove(pack)
-                    # update in hashtable
-                    newTable.search(pack.packageId).status = f'Delivered at {deliveredTime}' # update in hashtable
+                    # update in hashtable]
+                    #newTable.search(pack.packageId).status = "Delivered"
+                    newTable.assignStatus(pack, deliveredTime)    
 
-            #Change package status
-            package.status = f'Delivered at {deliveredTime}'
-            newTable.search(package.packageId).status = f'Delivered at {deliveredTime}' # update in hashtable
+            #Change package status in the truck and in hashtable
+            #package.status = 'Delivered'
             #Remove package from truck
             truck.packages.remove(package)
+
+            #Update status to Deliver
+            #newTable.search(package.packageId).status = "Delivered"
+            newTable.assignStatus(package, deliveredTime)                   
+
+
             return deliveredTime
         
+
+        totalMilages = 0
                
         #Start route (nearest neighbor)
-        def createRoute(truck, startTime):  
+        def createRoute(truck, startTime):
+
+
+            print("new route")
+            #Assign a new status to packages 
 
             #Start route
             startPoint = "4001 South 700 East"
@@ -114,12 +126,13 @@ def startDelivery():
             
                 #For each package determine the best address and deliver it
                 for package in truck.packages:
+
                     if package.status != "Delivered":
-                        #Update packages status
-                        package.status = f'en route at {timeInFirstPoint}'
+                      
                         #Get indices of start and end points
                         startPointIndex = newGraph.getIndexOfVertex(startPoint)
                         possibleDestinationIndex = newGraph.getIndexOfVertex(package.address)
+
                         #Get distance between current point and possible one
                         distance = newGraph.get_distanceOfVertexes(startPointIndex, possibleDestinationIndex)
 
@@ -138,12 +151,12 @@ def startDelivery():
                                 currentPackageinDelivery = package
 
                 deliveryTime = truck.estimatedTimeofDelivery(truck.speed, minimalDistance, timeInFirstPoint)
-                #print(f"Package {currentPackageinDelivery.packageId} from {startPoint} to  with deadline {currentPackageinDelivery.address} {currentPackageinDelivery.deadline} delivered at {deliveryTime}")
+                print(f"Package {currentPackageinDelivery.packageId} from {startPoint} to {currentPackageinDelivery.address} leaving at {timeInFirstPoint} will be delivered at {deliveryTime}")    
                 timeInFirstPoint = deliver(currentPackageinDelivery, minimalDistance, timeInFirstPoint, truck.speed, truck)
                 startPoint = currentPackageinDelivery.address
                 
             
-                
+
             #Go back to hub and get time of arival
             hubIndex = newGraph.getIndexOfVertex("4001 South 700 East")
             currentAddress = newGraph.getIndexOfVertex(startPoint)
@@ -152,8 +165,8 @@ def startDelivery():
             #Set new time when truck will be at the address
             timeToGetToDestination = distance / truck.speed
             timeAtHub = timeInFirstPoint + datetime.timedelta(hours=timeToGetToDestination)
-            #Increase milage
-            truck.milage = truck.milage + distanceToHub
+            nonlocal totalMilages
+            totalMilages += truck.milage
             return timeAtHub 
                             
 
@@ -161,21 +174,25 @@ def startDelivery():
         secondTruckRoute = createRoute(secondTruck, time)
 
 
-
         #Create a second load
 
         newLoad = []
 
         def secondLoad(truck, time):
-
             packagesLeft = 0
             for bucket in newTable.table:
-                for packages in bucket:
+                for packages in bucket:                    
                     if(packages.status == "at the hub"):
+                        # Add entry to status history
                         newLoad.append(packages)
                         packagesLeft += 1
+                        
+            truck =  dataStructures.Truck.Truck(packagesLeft, 18, newLoad, truck.milage, time)
 
-            truck =  dataStructures.Truck.Truck(packagesLeft, 18, newLoad, truck.milage, time)       
+            #Update status
+            for pack in newLoad:
+                newTable.assignStatus(pack, time)       
+
             return truck        
 
         if(firstTruckRoute > secondTruckRoute):
@@ -184,9 +201,10 @@ def startDelivery():
             selectedTruck = secondLoad(secondTruck, secondTruckRoute)
             createRoute(selectedTruck, secondTruckRoute)
         else:
- 
+            print(firstTruckRoute)
             #Load and send first truck
             selectedTruck = secondLoad(firstTruck, firstTruckRoute)
             createRoute(selectedTruck, firstTruckRoute)
 
-        return newTable
+  
+        return newTable, totalMilages

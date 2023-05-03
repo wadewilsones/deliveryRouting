@@ -1,3 +1,4 @@
+import datetime
 # This class describes package
 class Package:
 
@@ -10,8 +11,8 @@ class Package:
     zipCode = "";
     weight = -1; 
     notes = "";
-    status = "at the hub"
-
+    status= ""
+    statusHistory = []
     #Constructor
     def __init__(self, id, address, city, state, zipCode, deadline, weight, notes, status):
 
@@ -24,6 +25,8 @@ class Package:
         self.weight = weight;
         self.notes = notes;
         self.status = status
+        self.statusHistory = ["at the hub", datetime.datetime.combine(datetime.date.today(), datetime.time(hour=7, minute = 0))], ["en route", None],["Delivered", None]
+
 
 
   
