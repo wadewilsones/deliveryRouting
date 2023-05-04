@@ -86,20 +86,16 @@ def startDelivery():
             #Test is there any other package at the same address
             for pack in truck.packages:
                 if(package.address == pack.address and package.packageId != pack.packageId):
-                    package.status = 'Delivered'
                     truck.packages.remove(pack)
-                    # update in hashtable]
-                    #newTable.search(pack.packageId).status = "Delivered"
-                    newTable.assignStatus(pack, deliveredTime)    
-
-            #Change package status in the truck and in hashtable
-            #package.status = 'Delivered'
+                    # update in hashtable
+                    newTable.assignStatus(pack, deliveredTime)
+                    pack.status = 'Delivered'              
+                             
             #Remove package from truck
             truck.packages.remove(package)
-
             #Update status to Deliver
-            #newTable.search(package.packageId).status = "Delivered"
-            newTable.assignStatus(package, deliveredTime)                   
+            newTable.assignStatus(package, deliveredTime)          
+              
 
 
             return deliveredTime
@@ -109,10 +105,6 @@ def startDelivery():
                
         #Start route (nearest neighbor)
         def createRoute(truck, startTime):
-
-
-            print("new route")
-            #Assign a new status to packages 
 
             #Start route
             startPoint = "4001 South 700 East"
@@ -151,7 +143,7 @@ def startDelivery():
                                 currentPackageinDelivery = package
 
                 deliveryTime = truck.estimatedTimeofDelivery(truck.speed, minimalDistance, timeInFirstPoint)
-                print(f"Package {currentPackageinDelivery.packageId} from {startPoint} to {currentPackageinDelivery.address} leaving at {timeInFirstPoint} will be delivered at {deliveryTime}")    
+                #print(f"Package {currentPackageinDelivery.packageId} from {startPoint} to {currentPackageinDelivery.address} leaving at {timeInFirstPoint} will be delivered at {deliveryTime}")    
                 timeInFirstPoint = deliver(currentPackageinDelivery, minimalDistance, timeInFirstPoint, truck.speed, truck)
                 startPoint = currentPackageinDelivery.address
                 
@@ -201,7 +193,6 @@ def startDelivery():
             selectedTruck = secondLoad(secondTruck, secondTruckRoute)
             createRoute(selectedTruck, secondTruckRoute)
         else:
-            print(firstTruckRoute)
             #Load and send first truck
             selectedTruck = secondLoad(firstTruck, firstTruckRoute)
             createRoute(selectedTruck, firstTruckRoute)
