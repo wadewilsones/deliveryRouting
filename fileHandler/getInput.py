@@ -10,7 +10,7 @@ def insertData(newTable, type):
 
 
         #open file with data
-            excelData = openpyxl.load_workbook(f'./fileHandler/{type}.xlsx')
+            excelData = openpyxl.load_workbook(f'./fileHandler/{type}.xlsx') 
             excelSheet = excelData['Sheet1']
 
             if(type == "package"):

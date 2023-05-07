@@ -66,14 +66,14 @@ class HashTable:
             for package in bucket:
                     #if still in a hub
 
-                    if(time.time() <= package.statusHistory[0][1].time()):
-                        print(f"Package {package.packageId} is {package.statusHistory[0][0]}")
+                    if(time.time() < package.statusHistory[1][1].time()):
+                        print(f"Package {package.packageId} status is {package.statusHistory[0][0]}")
                     #if still in a route
-                    elif(time.time() <= package.statusHistory[1][1].time() and time.time() > package.statusHistory[0][1].time()):
-                        print(f"Package {package.packageId} is {package.statusHistory[1][0]}")
+                    elif(time.time() < package.statusHistory[2][1].time()):
+                        print(f"Package {package.packageId} status is {package.statusHistory[1][0]}")
                     #if delivered
                     elif(time.time() >= package.statusHistory[2][1].time()):
-                        print(f"Package {package.packageId} is {package.statusHistory[2][0]}")
+                        print(f"Package {package.packageId} status is {package.statusHistory[2][0]}")
 
                         
                     

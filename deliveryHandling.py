@@ -46,11 +46,13 @@ def startDelivery():
                 if(len(firstTruckLoad) < 10):
                     if not re.search(r"delayed", str(package.notes), re.IGNORECASE):
                         firstTruckLoad.append(package)
+                elif(len(secondTruckLoad) < 3):
+                    secondTruckLoad.append(package)
 
                     
             for package in eodPackages:
                             
-                if(len(firstTruckLoad) < 9):
+                if(len(firstTruckLoad) < 10):
                     if not re.search(r"delayed", str(package.notes), re.IGNORECASE) and not re.search(r"2", str(package.notes), re.IGNORECASE):
                         firstTruckLoad.append(package)
                             
@@ -68,8 +70,6 @@ def startDelivery():
                 newTable.assignStatus(pack, time)                      
                 
         initialLoad()
-
-
 
 
         #  Load trucks with selected packages
@@ -106,6 +106,7 @@ def startDelivery():
         #Start route (nearest neighbor)
         def createRoute(truck, startTime):
 
+            print("new truck")
             #Start route
             startPoint = "4001 South 700 East"
             listOfVertexes = newGraph.convertToString()
@@ -132,9 +133,10 @@ def startDelivery():
                         if package.packageId == 9 and timeInFirstPoint > datetime.datetime.combine(datetime.date.today(), datetime.time(hour=10, minute = 20)):
                             package.address = "410 S State St"
                         
-                        if package.deadline != "EOD" and timeInFirstPoint > datetime.datetime.combine(datetime.date.today(), datetime.time(hour=10, minute = 0)):
+                        if package.deadline != "EOD" and timeInFirstPoint > datetime.datetime.combine(datetime.date.today(), datetime.time(hour=9, minute = 50)):
                             minimalDistance = distance
                             currentPackageinDelivery = package
+                            
                             break
 
                         #Find the shortest distance
@@ -143,7 +145,7 @@ def startDelivery():
                                 currentPackageinDelivery = package
 
                 deliveryTime = truck.estimatedTimeofDelivery(truck.speed, minimalDistance, timeInFirstPoint)
-                #print(f"Package {currentPackageinDelivery.packageId} from {startPoint} to {currentPackageinDelivery.address} leaving at {timeInFirstPoint} will be delivered at {deliveryTime}")    
+                print(f"Package {currentPackageinDelivery.packageId} from {startPoint} to {currentPackageinDelivery.address} leaving at {timeInFirstPoint} will be delivered at {deliveryTime} deadline of pack: {currentPackageinDelivery.deadline}")    
                 timeInFirstPoint = deliver(currentPackageinDelivery, minimalDistance, timeInFirstPoint, truck.speed, truck)
                 startPoint = currentPackageinDelivery.address
                 
